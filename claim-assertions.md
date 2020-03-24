@@ -65,6 +65,10 @@ Section 5.5.1 of the OpenID Connect specification [@!OIDC] defines a query synta
 
 The key words "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "MAY", and "CAN" in this document are to be interpreted as described in "Key words for use in RFCs to Indicate Requirement Levels" [@!RFC2119]. These key words are not used as dictionary terms such that any occurrence of them shall be interpreted as key words and are not to be interpreted with their natural language meanings
 
+## Terminology
+
+This specification uses the terms "Claim", "Claim Type", "Claims Provider","ID Token", "OpenID Provider (OP)", "Relying Party (RP)", and "UserInfo Endpoint" defined by OpenID Connect [@!OIDC]
+
 # Request
 
 Since `assertion_claims` contains the assertion of effective claims about the End-User in a nested claims element, the syntax is extended to include expressions on nested elements as follows. `assertion_claims` includes the desired assertions over known claims. claims element can have members like purpose and ial defined in specification, one special member that this element must have is assertion.
