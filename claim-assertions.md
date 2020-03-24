@@ -6,7 +6,7 @@ area = "Identity"
 workgroup = "connect"
 keyword = ["security", "openid", "authorization", "trust"]
  
-date = 2020-03-19T12:00:00Z
+date = 2020-03-24T10:40:28Z
  
 [seriesInfo]
 name = "Internet-Draft"
@@ -49,15 +49,13 @@ organization="Santander Technology"
 
 .# Abstract
 
-This specification defines a new claim that allow assertions over known claims.
+This specification defines a new claim that allows assertions over known claims.
 
 {mainmatter}
 
 # Introduction {#Introduction}
 
-In order to avoid unnecessary leak of information the answer to some claims may be only a boolean verifying the claim instead of returning the actual value.
-
-The content of the response for this claim request MUST be an object with a list of objects (one per claim) indicating the result of the verification.
+In order to avoid unnecessary leak of information, the answer to some claims may be only a boolean verifying the claim instead of returning the actual value.
 
 Section 5.5.1 of the OpenID Connect specification [@!OIDC] defines a query syntax that allows for the member `value` of the claim being requested to be a JSON object with additional information/constraints on the claim. For doing so it defines three members (essential, value and values) with special query meanings and allows for other special members to be defined (while stating that any members that are not understood must be ignored).
 
@@ -71,16 +69,33 @@ This specification uses the terms "Claim", "Claim Type", "Claims Provider","ID T
 
 # Request
 
-Since `assertion_claims` contains the assertion of effective claims about the End-User in a nested claims element, the syntax is extended to include expressions on nested elements as follows. `assertion_claims` includes the desired assertions over known claims. claims element can have members like purpose and ial defined in specification, one special member that this element must have is assertion.
-Assertion
+This specification defines a generic mechanisms to request assertions over claims using the new element `assertion_claims`. This new element will be use inside the parameter `claims` specified in section 5.5 of [@!OIDC] as a normal claim at `id_token` or `userinfo` level. It will contain the assertions of actual claims about the End-User.
 
-While this specification re-uses that mechanism and introduces a new such members as logical operators, in order to provide accurate information if one of this members is not understood OP will provide an object but the result will be empty as otherwise the information provided may not match the intended verification by the RP.
+The top level elements of `assertion_claims` JSON object are the actual claim names with an assertion:
+
+```json
+{
+  "assertion_claims": {
+    "given_name": {
+      "assertion": { "eq": "William" }
+    }
+  }
+}
+```
+
+The following members are defined per every claim:
+
+* `assertion` REQUIRED: Expression that will be evaluated against the actual value of the claim
+* `purpose` OPTIONAL: String describing the purpose of the request to the End-User
+* `essential` OPTIONAL: As defined at section 5.5.1 [@!OIDC]
+
+Every other member that is not understood by the OP SHOULD be ignored.
 
 # Expression language
 
 The `assertion` member contains the expression that it will be evaluated as true/false depending the actual value of the named claim.
 
-This language SHOULD be defined by the OP and it MUST be discoverable at the well-known endpoint.
+This language SHOULD be defined by the OP and it MUST be discoverable at the well-known endpoint, see section [OP Metadata](#op-metadata).
 
 Recommended names for operations (if applicable):
 
@@ -91,35 +106,37 @@ Recommended names for operations (if applicable):
 * eq: The value is equal to the given value.
 * in: The value is equal to one of the elements in the list.
 
+The OP is entitled to change the specification to match its requirements.
+
 ## Simple types
 
 Every claim value has a type (i.e. String, Number), depending on the type of the claim some operators could be valid or not, or even perform some conversion before executing the expression.
 
-In the following example, `name` type is `string` and the result of the expression evaluation becomes true only if the value of the claim is `William`.
+In the following example, `given_name` type is `string` and the result of the expression evaluation becomes true only if the value of the claim is `William`.
 
 ```json
 {
   "assertion_claims": {
-    "name": {
+    "given_name": {
       "assertion": { "eq": "William" }
     }
   }
 }
 ```
 
-In this case the type does not match and its behavior is undefined, the OP could return an error information in this case
+In this case the type does not match and its behavior is undefined, the OP could return an error information in this case:
 
 ```json
 {
   "assertion_claims": {
-    "name": {
+    "given_name": {
       "assertion": { "eq": 42 }
     }
   }
 }
 ```
 
-In some cases the evaluation requires conversions, `simple_balance` contains a decimal number as a `string` and require a conversion before evaluation. The following expression becomes `true` only if the value of the claim is greater that `1234.00`
+In some cases the evaluation requires conversions, `simple_balance` contains a decimal number as a `string` and require a conversion before evaluation. The following expression becomes `true` only if the value of the claim is greater that `1234.00`.
 
 ```json
 {
@@ -131,11 +148,22 @@ In some cases the evaluation requires conversions, `simple_balance` contains a d
 }
 ```
 
-An empty assertion always returns true.
+An empty assertion always returns `true`.
 
 ## Complex types
 
-Some claim values are objects, to provide assertions over properties of those values a new operator is required. This will prevent any collision between operator and property names. 
+Some claim values are objects, to provide assertions over properties of those values a new operator is required. This will prevent any collision between operator and property names.
+
+`balance` claim value example:
+
+```json
+{
+  "balance": {
+    "amount": "1200.00",
+    "currency": "GBP"
+  }
+}
+```
 
 `props` is use in the following example:
 
@@ -154,20 +182,11 @@ Some claim values are objects, to provide assertions over properties of those va
 }
 ```
 
-`balance` value example:
-
-```json
-{
-  "balance": {
-    "amount": "1200.00",
-    "currency": "GBP"
-  }
-}
-```
-
-Any property that is not included in the expression do not affect the evaluation.
+Any property that is not included in the expression do not affect the evaluation. For example, if `currency` is not included in the assertion will not affect the outcome.
 
 Any assertion over a missing property returns `false`
+
+## Example
 
 The following is a non normative example of the request of an assertion claim:
 
@@ -175,7 +194,7 @@ The following is a non normative example of the request of an assertion claim:
 {
   "id_token": {
     "assertion_claims": {
-      "name": {
+      "given_name": {
         "assertion": { "eq": "Leonard" }
       },
       "balance": {
@@ -274,7 +293,7 @@ The following is a non normative example of the response of an assertion claim
   </front>
 </reference>
 
-# OP Metadata
+# OP Metadata {#op-metadata}
 
 The OP advertises its capabilities with respect to assertion Claims in its openid-configuration (see [@!OIDC.Discovery]) using the following new elements:
 
