@@ -85,9 +85,9 @@ The top level elements of `assertion_claims` JSON object are the actual claim na
 
 The following members are defined per every claim:
 
-* `assertion` REQUIRED: Expression that will be evaluated against the actual value of the claim
-* `purpose` OPTIONAL: String describing the purpose of the request to the End-User
-* `essential` OPTIONAL: As defined at section 5.5.1 [@!OIDC]
+* `assertion` REQUIRED, Object: Expression that will be evaluated against the actual value of the claim
+* `purpose` OPTIONAL, String: String describing the purpose of the request to the End-User
+* `essential` OPTIONAL, Boolean: As defined at section 5.5.1 [@!OIDC]
 
 Every other member that is not understood by the OP SHOULD be ignored.
 
@@ -215,12 +215,12 @@ The following is a non normative example of the request of an assertion claim:
 
 # Response
 
-The assertion claim will return the result of apply logical operators each requested claim
+The assertion claim will return the result of the assertion execution or the possible errors.
 
-Implementators MUST return an object for each claim with the following fields:
+Implementers MUST return an object for each claim inside `assertion_claims` object with the following fields:
 
-* result: REQUIRED. Boolean, it indicates if the claim meets the query. If the claim is not found, does not match, OP does not understand any of the logical expression language member or any other problem resolving the value this element should be returned empty.
-* error: OPTIONAL. When the OP is not able to understand one or more of the query members and error MAY be returned
+* `result` REQUIRED. Boolean: it indicates if the claim meets the assertion. If the claim is not found, does not match, OP does not understand any of the logical expression language member or any other problem resolving the value this element should be returned empty.
+* `error` OPTIONAL, Any: When the OP is not able to understand one or more of the query members and error MAY be returned
 
 The following is a non normative example of the response of an assertion claim
 
@@ -297,15 +297,9 @@ The following is a non normative example of the response of an assertion claim
 
 The OP advertises its capabilities with respect to assertion Claims in its openid-configuration (see [@!OIDC.Discovery]) using the following new elements:
 
-assertion_claims_supported: Boolean value indicating support of assertion claims.
-
-claims_in_assertion_claims_supported: List of claims that can be included in assertion_claims claim.
-
-assertion_claims_query_language_supported: List of members supported in claims included in the assertion_claims claim.
-
-assertion_claims_regex_supported: type of expression language supported by the OP
-
-assertion_claims_confidence_algorithm: Algorithm used by the confidence member
+* `assertion_claims_supported`: Boolean value indicating support of assertion claims.
+* `claims_in_assertion_claims_supported`: List of claims that can be included in assertion_claims claim.
+* `assertion_claims_query_language_supported`: List of members supported in claims included in the assertion_claims claim.
 
 # IANA Considerations
 
