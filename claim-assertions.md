@@ -55,9 +55,9 @@ This specification defines a new claim that allows assertions over known claims.
 
 # Introduction {#Introduction}
 
-In order to avoid unnecessary leak of information, the answer to some claims may be only a boolean verifying the claim instead of returning the actual value.
+In order to avoid unnecessary leak of information, the answer to some claims may be only a boolean verifying the claim instead of returning the actual value. As example, assert that one is older than 18 without revealing the actual age.
 
-Section 5.5.1 of the OpenID Connect specification [@!OIDC] defines a query syntax that allows for the member `value` of the claim being requested to be a JSON object with additional information/constraints on the claim. For doing so it defines three members (essential, value and values) with special query meanings and allows for other special members to be defined (while stating that any members that are not understood must be ignored).
+Section 5.5.1 of the OpenID Connect specification [@!OIDC] defines a query syntax that allows for the member `value` of the claim being requested to be a JSON object with additional information/constraints on the claim. For doing so it defines three members (essential, value and values) with special query meanings and allows for other special members to be defined (while stating that any members that are not understood must be ignored). This mechanism does not cover the above requirements, in this specification we will try to complement [@!OIDC] specification with a richer syntax.
 
 ## Notational conventions
 
@@ -69,15 +69,17 @@ This specification uses the terms "Claim", "Claim Type", "Claims Provider","ID T
 
 # Request
 
-This specification defines a generic mechanisms to request assertions over claims using the new element `assertion_claims`. This new element will be use inside the parameter `claims` specified in section 5.5 of [@!OIDC] as a normal claim at `id_token` or `userinfo` level. It will contain the assertions of actual claims about the End-User.
+This specification defines a generic mechanism to request assertions over claims using the new element `assertion_claims`. This new element will be used inside the parameter `claims` specified in section 5.5 of [@!OIDC] as a normal claim at `id_token` or `userinfo` level. It will contain the assertions of claims about the End-User.
 
 The top level elements of `assertion_claims` JSON object are the actual claim names with an assertion:
 
 ```json
 {
-  "assertion_claims": {
-    "given_name": {
-      "assertion": { "eq": "William" }
+"id_token": {
+    "assertion_claims": {
+      "given_name": {
+        "assertion": { "eq": "William" }
+      }
     }
   }
 }
@@ -85,22 +87,22 @@ The top level elements of `assertion_claims` JSON object are the actual claim na
 
 The following members are defined per every claim:
 
-* `assertion` REQUIRED, Object: Expression that will be evaluated against the actual value of the claim
-* `purpose` OPTIONAL, String: String describing the purpose of the request to the End-User
+* `assertion` REQUIRED, Object: Expression that will be evaluated against the actual value of the claim.
+* `purpose` OPTIONAL, String: String describing the purpose of the request to the End-User.
 * `essential` OPTIONAL, Boolean: As defined at section 5.5.1 [@!OIDC]
 
 Every other member that is not understood by the OP SHOULD be ignored.
 
 # Expression language
 
-The `assertion` member contains the expression that it will be evaluated as true/false depending the actual value of the named claim.
+The `assertion` member contains the expression (a JSON object) that will be evaluated as `true`/`false` depending on the actual value of the named claim.
 
 This language SHOULD be defined by the OP and it MUST be discoverable at the well-known endpoint, see section [OP Metadata](#op-metadata).
 
-Recommended names for operations (if applicable):
+Recommended operations (if applicable):
 
-* gt: The value should be greater than the given value (Use in currency, numbers, dates..)
-* lt: The value should be lower than the given value (Use in currency, numbers, dates...)
+* gt: The value should be greater than the given value.
+* lt: The value should be lower than the given value.
 * gte: The value is equal or greater than the given value.
 * lte: The value is equal or lower than the given value.
 * eq: The value is equal to the given value.
@@ -124,7 +126,7 @@ In the following example, `given_name` type is `string` and the result of the ex
 }
 ```
 
-In this case the type does not match and its behavior is undefined, the OP could return an error information in this case:
+In the following case the type does not match and its behavior is undefined, the OP could return an error information in this case:
 
 ```json
 {
@@ -136,7 +138,7 @@ In this case the type does not match and its behavior is undefined, the OP could
 }
 ```
 
-In some cases the evaluation requires conversions, `simple_balance` contains a decimal number as a `string` and require a conversion before evaluation. The following expression becomes `true` only if the value of the claim is greater that `1234.00`.
+In some cases the evaluation requires conversions. For instance, `simple_balance` contains a decimal number as a `string` and require a conversion before evaluation. The following expression becomes `true` only if the value of the claim is greater that `1234.00`.
 
 ```json
 {
@@ -148,11 +150,27 @@ In some cases the evaluation requires conversions, `simple_balance` contains a d
 }
 ```
 
+If there are multiple operators (i.e. `gt` or `lte`), the expression will be evaluated as `true` if every single evaluation is `true`. In other words, it behave as a logical `and`. The following example will be `true` only if the claim value is between `1234.00` exclusive and `20000.00` inclusive:
+
+
+```json
+{
+  "assertion_claims": {
+    "simple_balance": {
+      "assertion": {
+        "gt": "1234.00",
+        "lte": "20000.00"
+      }
+    }
+  }
+}
+```
+
 An empty assertion always returns `true`.
 
 ## Complex types
 
-Some claim values are objects, to provide assertions over properties of those values a new operator is required. This will prevent any collision between operator and property names.
+Some claim values are objects, to provide assertions over properties of those values a new operator is required. This will prevent any collision between operator and property names. We will use `props` operator for that purpose.
 
 `balance` claim value example:
 
@@ -165,7 +183,7 @@ Some claim values are objects, to provide assertions over properties of those va
 }
 ```
 
-`props` is use in the following example:
+`props` is used in the following example:
 
 ```json
 {
@@ -173,8 +191,8 @@ Some claim values are objects, to provide assertions over properties of those va
     "balance": {
       "assertion": {
         "props": {
-          "amount": "1000.00",
-          "currency": "GBP"
+          "amount": { "gt": "1000.00" },
+          "currency": { "eq": "GBP" }
         }
       }
     }
@@ -182,13 +200,15 @@ Some claim values are objects, to provide assertions over properties of those va
 }
 ```
 
-Any property that is not included in the expression do not affect the evaluation. For example, if `currency` is not included in the assertion will not affect the outcome.
+This expression became `true` only if `amount` and `currency` expressions are `true`. 
 
-Any assertion over a missing property returns `false`
+Any property that is not included in the expression will not affect the evaluation. For example, if `currency` is not included in the assertion, it will not affect the outcome.
+
+Any assertion over a missing property returns `false`.
 
 ## Example
 
-The following is a non normative example of the request of an assertion claim:
+The following is a non normative example of a request containing assertions:
 
 ```json
 {
@@ -217,10 +237,10 @@ The following is a non normative example of the request of an assertion claim:
 
 The assertion claim will return the result of the assertion execution or the possible errors.
 
-Implementers MUST return an object for each claim inside `assertion_claims` object with the following fields:
+Implementers MUST return an object for each claim inside `assertion_claims` element with the following fields:
 
-* `result` REQUIRED. Boolean: it indicates if the claim meets the assertion. If the claim is not found, does not match, OP does not understand any of the logical expression language member or any other problem resolving the value this element should be returned empty.
-* `error` OPTIONAL, Any: When the OP is not able to understand one or more of the query members and error MAY be returned
+* `result` REQUIRED. Boolean: it indicates if the claim value meets the assertion. If the claim is not found, does not match, OP does not understand the expression or any other problem resolving the value, this element should be equal `null`.
+* `error` OPTIONAL, Any: Available information about the error resolving the assertion.
 
 The following is a non normative example of the response of an assertion claim
 
