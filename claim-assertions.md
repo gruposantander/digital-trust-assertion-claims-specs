@@ -322,6 +322,76 @@ The OP SHOULD advertise their capabilities with respect to assertion claims in t
 * `claims_in_assertion_claims_supported`: List of claims that can be included in the `assertion_claims` element.
 * `assertion_claims_query_language_supported`: List of members supported in the claims included in the `assertion_claims` element.
 
+Non normative example:
+
+```json
+{
+  "assertion_claims_query_language_supported": {
+    "date": [
+      "eq",
+      "gt",
+      "lt",
+      "gte",
+      "lte",
+      "in"
+    ],
+    "decimal": [
+      "eq",
+      "gt",
+      "lt",
+      "gte",
+      "lte"
+    ],
+    "number": [
+      "eq",
+      "gt",
+      "lt",
+      "gte",
+      "lte"
+    ],
+    "object": [],
+    "phone_number": [
+      "eq",
+      "in"
+    ],
+    "string": [
+      "eq",
+      "in"
+    ]
+  },
+  "assertion_claims_supported": true,
+  "claims_in_assertion_claims_supported": {
+    "total_balance": {
+      "type": "object",
+      "props": {
+        "amount": {
+          "type": "decimal"
+        },
+        "currency": {
+          "type": "string"
+        }
+      }
+    },
+    "phone_number": {
+      "type": "phone_number"
+    },
+    "email": {
+      "type": "string"
+    },
+    "birthdate": {
+      "type": "date"
+    },
+    "family_name": {
+      "type": "string"
+    },
+    "given_name": {
+      "type": "string"
+    }
+  }
+}
+
+```
+
 # IANA Considerations
 
 To be done.
