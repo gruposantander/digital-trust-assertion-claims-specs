@@ -1,50 +1,42 @@
 %%%
 title = "Claim Assertions"
 abbrev = "claim-assertions"
-ipr = "trust200902"
+ipr = "none"
 area = "Identity"
 workgroup = "connect"
 keyword = ["security", "openid", "authorization", "trust"]
- 
+
 date = 2020-03-24T10:40:28Z
- 
+
 [seriesInfo]
 name = "Internet-Draft"
 value = "claim-assertions-00"
 status = "standard"
- 
+
 [[author]]
 initials="A."
 surname="Pulido"
 fullname="Alberto Pulido Moyano"
-organization="Santander Technology"
+organization="Santander"
  [author.address]
  email = "alberto.pulido@santander.co.uk"
- 
+
 [[author]]
 initials="V."
 surname="Herraiz, Ed."
 fullname="Victor Herraiz Posada"
-organization="Santander Technology"
+organization="Santander"
  [author.address]
  email = "victor.herraiz@santander.co.uk"
- 
-[[author]]
-initials="M."
-surname="Herrero"
-fullname="Miguel Revesado"
-organization="Santander Technology"
- [author.address]
- email = "miguel.revesado@santander.co.uk"
- 
+
 [[author]]
 initials="J."
 surname="Oliva"
 fullname="Jorge Oliva Fernandez"
-organization="Santander Technology"
+organization="Santander"
  [author.address]
  email = "Jorge.OlivaFernandez@santander.co.uk"
- 
+
 %%%
 
 .# Abstract
