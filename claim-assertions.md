@@ -49,19 +49,19 @@ organization="Santander Technology"
 
 .# Abstract
 
-This specification defines a new claim that allows assertions over known claims.
+This specification defines a new claim that allows assertions over existing claims.
 
 {mainmatter}
 
 # Introduction {#Introduction}
 
-In order to avoid unnecessary leak of information, the answer to some claims may be only a boolean verifying the claim instead of returning the actual value. As example, assert that one is older than 18 without revealing the actual age.
+In order to avoid an unnecessary leak of information, the answer to some claims may be only a boolean, verifying the claim instead of returning the actual value. As an example, assert that one is older than 18 without revealing the actual age.
 
-Section 5.5.1 of the OpenID Connect specification [@!OIDC] defines a query syntax that allows for the member `value` of the claim being requested to be a JSON object with additional information/constraints on the claim. For doing so it defines three members (essential, value and values) with special query meanings and allows for other special members to be defined (while stating that any members that are not understood must be ignored). This mechanism does not cover the above requirements, in this specification we will try to complement [@!OIDC] specification with a richer syntax.
+Section 5.5.1 of the OpenID Connect specification [@!OIDC] defines a query syntax that allows for the member `value` of the requested claim to be a JSON object with additional information/constraints. For doing so it defines three members (essential, value and values) with special query meanings and allows for other special members to be defined. Any members that are not understood, must be ignored. This mechanism does not cover the above requirements and in this specification we will try to complement the [@!OIDC] specification with a richer syntax.
 
 ## Notational conventions
 
-The key words "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "MAY", and "CAN" in this document are to be interpreted as described in "Key words for use in RFCs to Indicate Requirement Levels" [@!RFC2119]. These key words are not used as dictionary terms such that any occurrence of them shall be interpreted as key words and are not to be interpreted with their natural language meanings
+The key words "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "MAY", and "CAN" in this document are to be interpreted as described in "Key words for use in RFCs to Indicate Requirement Levels" [@!RFC2119]. These key words are not used as dictionary terms such that any occurrence of them shall be interpreted as key words and are not to be interpreted with their natural language meanings.
 
 ## Terminology
 
@@ -69,9 +69,9 @@ This specification uses the terms "Claim", "Claim Type", "Claims Provider","ID T
 
 # Request
 
-This specification defines a generic mechanism to request assertions over claims using the new element `assertion_claims`. This new element will be used inside the parameter `claims` specified in section 5.5 of [@!OIDC] as a normal claim at `id_token` or `userinfo` level. It will contain the assertions of claims about the End-User.
+This specification defines a generic mechanism to request assertions over claims using the new element `assertion_claims`. This new element will be used inside the parameter `claims`, as specified in section 5.5 of [@!OIDC] as a normal claim at `id_token` or `userinfo` level. It will contain the assertions of any claims relating to the End-User.
 
-The top level elements of `assertion_claims` JSON object are the actual claim names with an assertion:
+The top level elements of the `assertion_claims` JSON object are the actual claim names with `assertion` member nested inside:
 
 ```json
 {
@@ -85,36 +85,38 @@ The top level elements of `assertion_claims` JSON object are the actual claim na
 }
 ```
 
-The following members are defined per every claim:
+The following members are defined for every claim:
 
 * `assertion` REQUIRED, Object: Expression that will be evaluated against the actual value of the claim.
 * `purpose` OPTIONAL, String: String describing the purpose of the request to the End-User.
 * `essential` OPTIONAL, Boolean: As defined at section 5.5.1 [@!OIDC]
 
-Every other member that is not understood by the OP SHOULD be ignored.
+Every other member that is not recognized by the OP SHOULD be ignored.
 
 # Expression language
 
-The `assertion` member contains the expression (a JSON object) that will be evaluated as `true`/`false` depending on the actual value of the named claim.
+The `assertion` member contains the expression (a JSON object) that will be evaluated as a `boolean` depending on the actual value of the named claim.
 
 This language SHOULD be defined by the OP and it MUST be discoverable at the well-known endpoint, see section [OP Metadata](#op-metadata).
 
 Recommended operations (if applicable):
 
+* eq: The value is equal to the given value.
 * gt: The value should be greater than the given value.
 * lt: The value should be lower than the given value.
 * gte: The value is equal or greater than the given value.
 * lte: The value is equal or lower than the given value.
-* eq: The value is equal to the given value.
 * in: The value is equal to one of the elements in the list.
 
-The OP is entitled to change the specification to match its requirements.
+The OP is entitled to change the specification to match any individual requirements.
 
 ## Simple types
 
-Every claim value has a type (i.e. String, Number), depending on the type of the claim some operators could be valid or not, or even perform some conversion before executing the expression.
+Every claim value has a type (i.e. String, Number) and depending on this type of the claim some operators will not be valid.
 
-In the following example, `given_name` type is `string` and the result of the expression evaluation becomes true only if the value of the claim is `William`.
+In some cases the value requires some manipulation before executing the expression (e.g. phone numbers require normalization).
+
+In the following example, `given_name` type is `string` and the result of the expression evaluation becomes `true` only if the value of the claim is `William`.
 
 ```json
 {
@@ -126,19 +128,19 @@ In the following example, `given_name` type is `string` and the result of the ex
 }
 ```
 
-In the following case the type does not match and its behavior is undefined, the OP could return an error information in this case:
+In the following case the type does not match and its behavior is undefined. The OP could then return an error in this case:
 
 ```json
 {
   "assertion_claims": {
     "given_name": {
-      "assertion": { "eq": 42 }
+      "assertion": { "eq": 1701 }
     }
   }
 }
 ```
 
-In some cases the evaluation requires conversions. For instance, `simple_balance` contains a decimal number as a `string` and require a conversion before evaluation. The following expression becomes `true` only if the value of the claim is greater that `1234.00`.
+In some cases the evaluation requires conversions. For instance, `simple_balance` contains a decimal number as a `string` and requires a conversion before evaluation. The following expression becomes `true` only if the value of the claim is greater than `1234.00`.
 
 ```json
 {
@@ -150,8 +152,7 @@ In some cases the evaluation requires conversions. For instance, `simple_balance
 }
 ```
 
-If there are multiple operators (i.e. `gt` or `lte`), the expression will be evaluated as `true` if every single evaluation is `true`. In other words, it behave as a logical `and`. The following example will be `true` only if the claim value is between `1234.00` exclusive and `20000.00` inclusive:
-
+If there are multiple operators (e.g. `gt` or `lte`), the expression will be evaluated as `true` if all operators return `true`. In other words, it behaves as a logical `and`. The following example will be `true` only if the claim value is greater than `1234.00` and less than or equal to `20000.00`:
 
 ```json
 {
@@ -170,7 +171,7 @@ An empty assertion always returns `true`.
 
 ## Complex types
 
-Some claim values are objects, to provide assertions over properties of those values a new operator is required. This will prevent any collision between operator and property names. We will use `props` operator for that purpose.
+Some claim values are objects and to provide assertions over properties of those values, a new operator is required. This will prevent any collision between operators and property names. We will use `props` for that purpose.
 
 `balance` claim value example:
 
@@ -200,7 +201,7 @@ Some claim values are objects, to provide assertions over properties of those va
 }
 ```
 
-This expression became `true` only if `amount` and `currency` expressions are `true`. 
+This expression will become `true` only if `amount` and `currency` expressions are `true`.
 
 Any property that is not included in the expression will not affect the evaluation. For example, if `currency` is not included in the assertion, it will not affect the outcome.
 
@@ -235,14 +236,14 @@ The following is a non normative example of a request containing assertions:
 
 # Response
 
-The assertion claim will return the result of the assertion execution or the possible errors.
+The request will return the result of the assertion execution and any potential errors.
 
 Implementers MUST return an object for each claim inside `assertion_claims` element with the following fields:
 
-* `result` REQUIRED. Boolean: it indicates if the claim value meets the assertion. If the claim is not found, does not match, OP does not understand the expression or any other problem resolving the value, this element should be equal `null`.
+* `result` REQUIRED. Boolean: it indicates if the claim value meets the assertion. If the claim is not found, does not match, the OP does not understand the expression or any other problem resolving the value, then this element should be equal to `null`.
 * `error` OPTIONAL, Any: Available information about the error resolving the assertion.
 
-The following is a non normative example of the response of an assertion claim
+The following is a non normative example of the response:
 
 ```json
 {
@@ -315,11 +316,11 @@ The following is a non normative example of the response of an assertion claim
 
 # OP Metadata {#op-metadata}
 
-The OP advertises its capabilities with respect to assertion Claims in its openid-configuration (see [@!OIDC.Discovery]) using the following new elements:
+The OP SHOULD advertise their capabilities with respect to assertion claims in their `openid-configuration` (see [@!OIDC.Discovery]) using the following new elements:
 
 * `assertion_claims_supported`: Boolean value indicating support of assertion claims.
-* `claims_in_assertion_claims_supported`: List of claims that can be included in assertion_claims claim.
-* `assertion_claims_query_language_supported`: List of members supported in claims included in the assertion_claims claim.
+* `claims_in_assertion_claims_supported`: List of claims that can be included in the `assertion_claims` element.
+* `assertion_claims_query_language_supported`: List of members supported in the claims included in the `assertion_claims` element.
 
 # IANA Considerations
 
