@@ -51,7 +51,7 @@ In order to avoid an unnecessary leak of information, the answer to some claims 
 
 Section 5.5.1 of the OpenID Connect specification [@!OIDC] defines a query syntax that allows for the member `value` of the requested claim to be a JSON object with additional information/constraints. For doing so it defines three members (essential, value and values) with special query meanings and allows for other special members to be defined. Any members that are not understood, must be ignored. This mechanism does not cover the above requirements and in this specification we will try to complement the [@!OIDC] specification with a richer syntax.
 
-## Notational conventions
+## Notational Conventions
 
 The key words "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "MAY", and "CAN" in this document are to be interpreted as described in "Key words for use in RFCs to Indicate Requirement Levels" [@!RFC2119]. These key words are not used as dictionary terms such that any occurrence of them shall be interpreted as key words and are not to be interpreted with their natural language meanings.
 
@@ -85,7 +85,7 @@ The following members are defined for every claim:
 
 Every other member that is not recognized by the OP SHOULD be ignored.
 
-# Expression language
+# Expression Language
 
 The `assertion` member contains the expression (a JSON object) that will be evaluated as a `boolean` depending on the actual value of the named claim.
 
@@ -102,7 +102,7 @@ Recommended operations (if applicable):
 
 The OP is entitled to change the specification to match any individual requirements.
 
-## Simple types
+## Simple Types
 
 Every claim value has a type (i.e. String, Number) and depending on this type of the claim some operators will not be valid.
 
@@ -161,7 +161,7 @@ If there are multiple operators (e.g. `gt` or `lte`), the expression will be eva
 
 An empty assertion always returns `true`.
 
-## Complex types
+## Complex Types
 
 Some claim values are objects and to provide assertions over properties of those values, a new operator is required. This will prevent any collision between operators and property names. We will use `props` for that purpose.
 
@@ -252,59 +252,6 @@ The following is a non normative example of the response:
 }
 ```
 
-{backmatter}
-
-
-<reference anchor="RFC2119" target="https://tools.ietf.org/html/rfc2119">
-  <front>
-    <title>Key words for use in RFCs to Indicate Requirement Levels</title>
-    <author initials="S." surname="Bradner" fullname="Scott Bradner">
-      <organization>Harvard University</organization>
-    </author>
-   <date month="March" year="1997"/>
-  </front>
-</reference>
-
-<reference anchor="OIDC" target="http://openid.net/specs/openid-connect-core-1_0.html">
-  <front>
-    <title>OpenID Connect Core 1.0 incorporating errata set 1</title>
-    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
-      <organization>NRI</organization>
-    </author>
-    <author initials="J." surname="Bradley" fullname="John Bradley">
-      <organization>Ping Identity</organization>
-    </author>
-    <author initials="M." surname="Jones" fullname="Mike Jones">
-      <organization>Microsoft</organization>
-    </author>
-    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
-      <organization>Google</organization>
-    </author>
-    <author initials="C." surname="Mortimore" fullname="Chuck Mortimore">
-      <organization>Salesforce</organization>
-    </author>
-   <date day="8" month="Nov" year="2014"/>
-  </front>
-</reference>
-
-<reference anchor="OIDC.Discovery" target="https://openid.net/specs/openid-connect-discovery-1_0.html">
-  <front>
-    <title>OpenID Connect Discovery 1.0 incorporating errata set 1</title>
-    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
-      <organization>NRI</organization>
-    </author>
-    <author initials="J." surname="Bradley" fullname="John Bradley">
-      <organization>Ping Identity</organization>
-    </author>
-    <author initials="M." surname="Jones" fullname="Mike Jones">
-      <organization>Microsoft</organization>
-    </author>
-    <author initials="E." surname="Jay" fullname="Edmund Jay">
-      <organization>Illumila</organization>
-    </author>
-   <date day="8" month="Nov" year="2014"/>
-  </front>
-</reference>
 
 # OP Metadata {#op-metadata}
 
@@ -396,8 +343,62 @@ The OP should not keep the information within `assertion_claims` unless necessar
 
 To be done.
 
+{backmatter}
+
+
+<reference anchor="RFC2119" target="https://tools.ietf.org/html/rfc2119">
+  <front>
+    <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+    <author initials="S." surname="Bradner" fullname="Scott Bradner">
+      <organization>Harvard University</organization>
+    </author>
+   <date month="March" year="1997"/>
+  </front>
+</reference>
+
+<reference anchor="OIDC" target="http://openid.net/specs/openid-connect-core-1_0.html">
+  <front>
+    <title>OpenID Connect Core 1.0 incorporating errata set 1</title>
+    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
+      <organization>NRI</organization>
+    </author>
+    <author initials="J." surname="Bradley" fullname="John Bradley">
+      <organization>Ping Identity</organization>
+    </author>
+    <author initials="M." surname="Jones" fullname="Mike Jones">
+      <organization>Microsoft</organization>
+    </author>
+    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
+      <organization>Google</organization>
+    </author>
+    <author initials="C." surname="Mortimore" fullname="Chuck Mortimore">
+      <organization>Salesforce</organization>
+    </author>
+   <date day="8" month="Nov" year="2014"/>
+  </front>
+</reference>
+
+<reference anchor="OIDC.Discovery" target="https://openid.net/specs/openid-connect-discovery-1_0.html">
+  <front>
+    <title>OpenID Connect Discovery 1.0 incorporating errata set 1</title>
+    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
+      <organization>NRI</organization>
+    </author>
+    <author initials="J." surname="Bradley" fullname="John Bradley">
+      <organization>Ping Identity</organization>
+    </author>
+    <author initials="M." surname="Jones" fullname="Mike Jones">
+      <organization>Microsoft</organization>
+    </author>
+    <author initials="E." surname="Jay" fullname="Edmund Jay">
+      <organization>Illumila</organization>
+    </author>
+   <date day="8" month="Nov" year="2014"/>
+  </front>
+</reference>
+
 # Notices
 
 Copyright (c) 2020 Grupo Santander
 
-We intent to release this especification under MIT license, pending internal process.
+We intent to release this specification under MIT license, pending internal process.
