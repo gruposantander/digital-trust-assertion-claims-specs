@@ -6,7 +6,7 @@ area = "Identity"
 workgroup = "connect"
 keyword = ["security", "openid", "authorization", "trust"]
 
-date = 2020-03-31T16:00:00Z
+date = 2020-04-02T12:00:00Z
 
 [seriesInfo]
 name = "Internet-Draft"
@@ -98,7 +98,8 @@ Recommended operations (if applicable):
 * lt: The value should be lower than the given value.
 * gte: The value is equal or greater than the given value.
 * lte: The value is equal or lower than the given value.
-* in: The value is equal to one of the elements in the list.
+* in: The value is equal to one of the elements in the given list.
+* or: The value pass any of the given expressions.
 
 The OP is entitled to change the specification to match any individual requirements.
 
