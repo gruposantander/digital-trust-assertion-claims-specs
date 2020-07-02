@@ -334,11 +334,11 @@ Non normative example:
 
 # Privacy Considerations
 
-The `assertion_claims` can contain Personally Identifiable Information (PII). As such, RP should obtain End-User consent for the release of the information at or prior to the request in accordance with relevant regulations.
+The `assertion_claims` can contain Personally Identifiable Information (PII). As such, OP SHOULD obtain End-User consent for the release of the information at or prior to the request in accordance with relevant regulations.
 
 How to get such consent is out of scope for this specification.
 
-The OP should not keep the information within `assertion_claims` unless necessary and should delete such information as soon as it is no longer necessary in accordance with relevant regulations.
+The RP SHOULD not keep the information within `assertion_claims` unless necessary and SHOULD delete such information as soon as it is no longer necessary in accordance with relevant regulations.
 
 # IANA Considerations
 
