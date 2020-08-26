@@ -398,6 +398,10 @@ To be done.
   </front>
 </reference>
 
+# Acknowledgements {#Acknowledgements}
+
+We would like to thank Kai Lehmann and Kosuke Koiwai for their valuable feedback and contributions that helped to evolve this specification.
+
 # Notices
 
 Copyright (c) 2020 Grupo Santander
