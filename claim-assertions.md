@@ -100,6 +100,9 @@ Recommended operations (if applicable):
 * lte: The value is equal or lower than the given value.
 * in: The value is equal to one of the elements in the given list.
 * or: The value pass any of the given expressions.
+* some: The value is equal to any of the values within an array.
+* none: The value is not equal to any of the values within an array.
+* every: The value is equal to all of the values within an array.
 
 The OP is entitled to change the specification to match any individual requirements.
 
@@ -200,9 +203,36 @@ Any property that is not included in the expression will not affect the evaluati
 
 Any assertion over a missing property returns `false`.
 
-## Example
+## Array Types
 
-The following is a non normative example of a request containing assertions:
+Some complex type claims could include properties as an array. If that's the case, the proposed set of operands also includes specific ones for creating assertions using those properties.
+
+Here is an example assertion request for a complex `bank_account` type claim which includes a property called `identifiers` , containing an array with several identifications for different schemas. The request could allow validating ownership on an account passing the identifier in Sort Code Account Number schema:
+
+```json
+{
+  "assertion_claims": {
+    "bank_account":{
+      "assertion": {
+        "props": {
+          "identifiers": {
+            "some": {
+              "props": {
+                "identification": { "eq": "09012700047186"},
+                "type": {"eq": "UK.SortCodeAccountNumber" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+```
+
+## Multiple Assertions Example
+
+The following is a non normative example of a request containing multiple assertions:
 
 ```json
 {
@@ -226,6 +256,8 @@ The following is a non normative example of a request containing assertions:
   }
 }
 ```
+
+Each assertion will be evaluated independently and the user should be able to consent and share each individual result back to the RP.
 
 # Response
 
@@ -252,7 +284,6 @@ The following is a non normative example of the response:
   }
 }
 ```
-
 
 # OP Metadata {#op-metadata}
 
@@ -297,6 +328,14 @@ Non normative example:
     "string": [
       "eq",
       "in"
+    ],
+    "boolean": [
+      "eq"
+    ],
+    "array": [
+      "none",
+      "every",
+      "some"
     ]
   },
   "assertion_claims_supported": true,
@@ -326,7 +365,35 @@ Non normative example:
     },
     "given_name": {
       "type": "string"
-    }
+    },
+    "bank_account": {
+      "type": "object",
+      "props": {
+        "id": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "identifiers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "props": {
+              "type": {
+                "type": "string"
+              },
+              "identification": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+  }
   }
 }
 
